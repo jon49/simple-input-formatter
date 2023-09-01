@@ -2,6 +2,8 @@
 
 Format the input element to whatever you like and only submit the raw data.
 
+This custom element is 1.1 kB minified.
+
 Define your formatter:
 
 ```js
