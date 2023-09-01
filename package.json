@@ -1,0 +1,21 @@
+{
+  "name": "simple-input-formatter",
+  "version": "0.1.1",
+  "description": "Minimalist JavaScript to make form input formatting simple",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx minify index.js > index.min.js"
+  },
+  "author": "Jon Nyman",
+  "license": "ISC",
+  "keywords": [
+      "input",
+      "form",
+      "html",
+      "format",
+      "simple",
+      "currency",
+      "custom element",
+      "web component"
+  ]
+}
