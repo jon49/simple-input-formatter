@@ -1,6 +1,6 @@
 {
   "name": "simple-input-formatter",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Minimalist JavaScript to make form input formatting simple",
   "bugs": {
     "url": "https://github.com/jon49/simple-input-formatter/issues"
@@ -19,7 +19,9 @@
       "format",
       "simple",
       "currency",
-      "custom element",
-      "web component"
+      "customelement",
+      "custom-element",
+      "webcomponent",
+      "web-component"
   ]
 }
