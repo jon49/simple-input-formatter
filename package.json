@@ -1,6 +1,6 @@
 {
   "name": "simple-input-formatter",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Minimalist JavaScript to make form input formatting simple",
   "bugs": {
     "url": "https://github.com/jon49/simple-input-formatter/issues"
@@ -8,7 +8,7 @@
   "homepage": "https://github.com/jon49/simple-input-formatter#readme",
   "main": "index.js",
   "scripts": {
-    "build": "npx minify index.js > index.min.js"
+    "build": "npx minify index.js > index.min.js && cp index.js docs/index.js"
   },
   "author": "Jon Nyman",
   "license": "MIT",
