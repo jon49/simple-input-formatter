@@ -1,6 +1,6 @@
 {
   "name": "simple-input-formatter",
-  "version": "0.1.5",
+  "version": "0.2.2",
   "description": "Minimalist JavaScript to make form input formatting simple",
   "bugs": {
     "url": "https://github.com/jon49/simple-input-formatter/issues"
