@@ -45,3 +45,11 @@ Put on your HTML page:
 
 See the tests to see how it works!
 
+## Change Log
+
+### 0.3.0
+
+Improved handling of invalid data.
+
+Added ability to insert error message in element using `data-show-invalid`.
+

@@ -1,6 +1,8 @@
 customElements.define('format-input', class extends HTMLElement {
 
-    constructor() { super() }
+    constructor() {
+        super()
+    }
 
     connectedCallback() {
         if (this.children.length) {
@@ -10,6 +12,73 @@ customElements.define('format-input', class extends HTMLElement {
         // not yet available, watch it for init
         this._observer = new MutationObserver(this._init.bind(this))
         this._observer.observe(this, { childList: true })
+    }
+
+    handleEvent(e) {
+        this[`on${e.type}`](e)
+    }
+
+    onfocus() {
+        if (!this.view.validationMessage) {
+            this.view.type = this._type
+            this.view.value = this.input.value
+        }
+    }
+
+    _setMessage() {
+        let query = this.dataset.showInvalid
+        let message = this.view.validationMessage
+        if (query && message) {
+            this.querySelector(query).textContent = message
+        } else if (query) {
+            this.querySelector(query).innerHTML = '&nbsp;'
+        }
+    }
+
+    formatterWait = 1
+    onblur() {
+        this.view.setCustomValidity('')
+        this._setMessage()
+        if (!this.view.checkValidity()) {
+            this._setMessage()
+            return
+        }
+        if (!this.formatter) {
+            return
+        }
+        let notValid = this.formatter?.isValid(this.view.value)
+        if (notValid) {
+            if (!this.inputListener) {
+                this.inputListener = true
+                this.view.addEventListener('input', this)
+            }
+            this.view.setCustomValidity(notValid)
+            this._setMessage()
+            return
+        }
+        this.input.value = this.view.value
+        this.view.type = 'text'
+        this.view.value = this.formatter.format(this.input.value)
+    }
+
+    onkeydown(e) {
+        if (e.key === 'Enter') {
+            this.onblur()
+        }
+    }
+
+    oninput() {
+        if (!this.formatter) {
+            return
+        }
+
+        console.log('input', this.view.value)
+        let notValid = this.formatter?.isValid(this.view.value)
+        if (!notValid) {
+            this.view.setCustomValidity('')
+            this.view.removeEventListener('input', this)
+            this._setMessage()
+        }
     }
 
     _init() {
@@ -24,8 +93,9 @@ customElements.define('format-input', class extends HTMLElement {
 
         let input = this.input = view.cloneNode()
 
-        view.addEventListener('focus', this.edit.bind(this))
+        view.addEventListener('focus', this)
 
+        this._type = view.type
         view.type = 'text'
         view.removeAttribute('name')
 
@@ -35,38 +105,24 @@ customElements.define('format-input', class extends HTMLElement {
     }
 
     addFormatter(format, wait = 1) {
-        setTimeout(() => {
+        this.timeoutId = setTimeout(() => {
             this.formatter =
                 format?.split('.')
                 .reduce((acc, val) => acc[val], window)
             if (!this.formatter) {
                 this.addFormatter(format, wait * 2)
             } else {
-                this.view.addEventListener('blur', this.format.bind(this))
-                this.format()
+                this.view.addEventListener('blur', this)
+                this.view.addEventListener('keydown', this)
+                this.onblur()
             }
         }, wait)
     }
 
-    edit() {
-        this.view.value = this.input.value
-    }
-
-    format() {
-        let notValid = this.formatter.isValid(this.view.value)
-        if (notValid) {
-            this.view.setCustomValidity(notValid)
-            return
-        } else {
-            this.view.setCustomValidity('')
-        }
-        this.input.value = this.view.value
-        this.view.value = this.formatter.format(this.input.value)
-    }
-
     disconnectedCallback() {
-        this.view.removeEventListener('focus', this.edit.bind(this))
-        this.view.removeEventListener('blur', this.format.bind(this))
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId)
+        }
     }
 });
 

@@ -4,18 +4,39 @@
         <title></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            .error {
+                color: red;
+                visibility: hidden;
+                padding: 0.1em;
+                margin: 0;
+                font-size: 0.8em;
+            }
+            input:invalid {
+                border: 1px solid red;
+            }
+            input:invalid + .error {
+                visibility: visible;
+            }
+        </style>
     </head>
     <body>
 
+    <h1>Format Input</h1>
+
+    <h2>Currency</h2>
     <form>
-        <format-input data-format="currency">
+        <format-input data-format="currency" data-show-invalid=".error">
             <input
                 type="number"
-                step="2"
+                step="0.01"
                 name="test"
                 placeholder="Give me a number!">
+            <p class="error">&nbsp;</p>
         </format-input>
+        <div>
         <button>OK</button>
+        </div>
     </form>
 
     <script>
@@ -33,6 +54,34 @@
                     return (isNaN(value))
                         ? 'Must be a number'
                     : ''
+                }
+            }
+        })()
+    </script>
+
+    <h2>My Footnote</h2>
+    <div>
+        <form>
+            <format-input data-format="my.footnote" data-show-invalid=".error">
+                <input type="text" name="test2" value="OK" required>
+                <p class="error">&nbsp;</p>
+            </format-input>
+            <p>* I like cheese!</p>
+        </form>
+    </div>
+
+    <script>
+        (() => {
+            window.my = {
+                footnote: {
+                    format(value) {
+                        return value + ' *'
+                    },
+                    isValid(value) {
+                        return (value === 'OK')
+                            ? ''
+                        : 'The only valid value is "OK"'
+                    }
                 }
             }
         })()
