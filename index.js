@@ -5,13 +5,21 @@ customElements.define('format-input', class extends HTMLElement {
     }
 
     connectedCallback() {
-        if (this.children.length) {
-            this._init()
+        let o = this
+        if (!o.stop) {
+            o.stop = true
+        } else {
+            return
+        }
+
+        if (o.children.length) {
+            o._init()
+            return
         }
 
         // not yet available, watch it for init
-        this._observer = new MutationObserver(this._init.bind(this))
-        this._observer.observe(this, { childList: true })
+        o._observer = new MutationObserver(o._init.bind(o))
+        o._observer.observe(o, { childList: true })
     }
 
     handleEvent(e) {
@@ -19,102 +27,105 @@ customElements.define('format-input', class extends HTMLElement {
     }
 
     onfocus() {
-        if (!this.view.validationMessage) {
-            this.view.type = this._type
-            this.view.value = this.input.value
+        let o = this
+        if (!o.view.validationMessage) {
+            o.view.type = o._type
+            o.view.value = o.input.value
         }
     }
 
     _setMessage() {
-        let query = this.dataset.showInvalid
-        let message = this.view.validationMessage
-        if (query && message) {
-            this.querySelector(query).textContent = message
-        } else if (query) {
-            this.querySelector(query).innerHTML = '&nbsp;'
+        let o = this
+        let query = o.dataset.showInvalid
+        if (query) {
+            o.querySelector(query).textContent = o.view.validationMessage
         }
     }
 
     formatterWait = 1
     onblur() {
-        this.view.setCustomValidity('')
-        this._setMessage()
-        if (!this.view.checkValidity()) {
-            this._setMessage()
+        let o = this
+        if (document.activeElement === o.view) return
+        o.view.setCustomValidity('')
+        o._setMessage()
+        if (!o.view.checkValidity()) {
+            o._setMessage()
             return
         }
-        if (!this.formatter) {
+        if (!o.formatter) {
             return
         }
-        let notValid = this.formatter?.isValid(this.view.value)
+        let notValid = o.formatter?.isValid(o.view.value)
         if (notValid) {
-            if (!this.inputListener) {
-                this.inputListener = true
-                this.view.addEventListener('input', this)
+            if (!o.inputListener) {
+                o.inputListener = true
+                o.view.addEventListener('input', o)
             }
-            this.view.setCustomValidity(notValid)
-            this._setMessage()
+            o.view.setCustomValidity(notValid)
+            o._setMessage()
             return
         }
-        this.input.value = this.view.value
-        this.view.type = 'text'
-        this.view.value = this.formatter.format(this.input.value)
+        o.input.value = o.view.value
+        o.view.type = 'text'
+        o.view.value = o.formatter.format(this.input.value)
     }
 
     onkeydown(e) {
         if (e.key === 'Enter') {
-            this.onblur()
+            this.input.value = this.view.value
         }
     }
 
     oninput() {
-        if (!this.formatter) {
+        let o = this
+        if (!o.formatter) {
             return
         }
 
-        console.log('input', this.view.value)
-        let notValid = this.formatter?.isValid(this.view.value)
+        let notValid = o.formatter?.isValid(o.view.value)
         if (!notValid) {
-            this.view.setCustomValidity('')
-            this.view.removeEventListener('input', this)
-            this._setMessage()
+            o.view.setCustomValidity('')
+            o.view.removeEventListener('input', o)
+            o._setMessage()
         }
     }
 
     _init() {
-        this._observer?.disconnect();
-        this._observer = undefined;
+        let o = this
+        o._observer?.disconnect();
+        o._observer = null;
 
-        let format = this.dataset.format
+        let format = o.dataset.format
         if (!format) return
 
-        let view = this.view = this.querySelector('input')
+        let view = o.view = o.querySelector('input')
         if (!view) return
 
-        let input = this.input = view.cloneNode()
+        let input = o.input = view.cloneNode()
 
-        view.addEventListener('focus', this)
+        view.addEventListener('focus', o)
 
-        this._type = view.type
+        o._type = view.type
         view.type = 'text'
         view.removeAttribute('name')
 
         input.type = 'hidden'
-        this.appendChild(input)
-        this.addFormatter(format)
+        o.appendChild(input)
+        o.addFormatter(format)
     }
 
     addFormatter(format, wait = 1) {
-        this.timeoutId = setTimeout(() => {
-            this.formatter =
+        let o = this
+        o.timeoutId = setTimeout(() => {
+            o.formatter =
                 format?.split('.')
                 .reduce((acc, val) => acc[val], window)
-            if (!this.formatter) {
-                this.addFormatter(format, wait * 2)
+            if (!o.formatter) {
+                o.addFormatter(format, wait * 2)
             } else {
-                this.view.addEventListener('blur', this)
-                this.view.addEventListener('keydown', this)
-                this.onblur()
+                o.view.addEventListener('blur', o)
+                o.view.addEventListener('keydown', o)
+                o.onblur()
             }
         }, wait)
     }
